@@ -1,0 +1,228 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{geometry}
+\geometry{left=2.6cm,right=2.6cm,top=2.8cm,bottom=2.8cm}
+
+\usepackage{setspace}
+\onehalfspacing
+\setlength{\parindent}{2em}
+
+\usepackage{xcolor}
+\definecolor{darkgreen}{RGB}{34,102,85}
+
+\usepackage{titlesec}
+\titleformat{\section}{\Large\bfseries\color{darkgreen}}{\thesection}{1em}{}[\titlerule]
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
+\titlespacing*{\section}{0pt}{3ex}{2ex}
+\titlespacing*{\subsection}{0pt}{2ex}{1.2ex}
+
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}
+
+\usepackage{listings}
+\definecolor{codebg}{RGB}{248,249,250}        % 极浅冷灰背景
+\definecolor{codeframe}{RGB}{215,218,223}     % 柔和灰边框
+\definecolor{codecomment}{RGB}{106,115,125}   % 注释灰，偏冷色
+\definecolor{codekeyword}{RGB}{80,130,200}    % 浅蓝关键字，清新自然
+\definecolor{codestring}{RGB}{200,120,100}    % 浅珊瑚红字符串，柔和区分
+
+\lstset{
+  backgroundcolor=\color{codebg},             % 背景
+  basicstyle=\ttfamily\small,                 % 等宽字体
+  keywordstyle=\bfseries\color{codekeyword},  % 关键字黑色加粗
+  commentstyle=\itshape\color{codecomment},   % 注释斜体灰色
+  stringstyle=\color{codestring},             % 字符串黑色
+  frame=single,                               % 单线边框
+  rulecolor=\color{codeframe},                % 边框颜色
+  numbers=left,                               % 行号在左
+  numberstyle=\tiny\color{codecomment},       % 行号灰色小号
+  breaklines=true,                            % 自动换行
+  tabsize=2,
+  captionpos=b,
+  xleftmargin=1em,                            % 左边距
+  xrightmargin=1em                            % 右边距
+}
+
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=darkgreen}
+
+% 页眉风格：左上标题，右上学号+姓名
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{数据库系统实验报告}
+\fancyhead[R]{09023402-金俊贤}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% 封面宏
+\newcommand{\reportTitle}[3]{%
+\begin{titlepage}
+\vspace*{2cm}
+\begin{center}
+{\Huge\bfseries #1 \par}
+\vspace{1cm}
+{\Large\color{darkgreen}#2 \par}
+\vspace{3cm}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{rl}
+课程名称： & #3 \\
+学号： & 09023402 \\
+姓名： & 金俊贤 \\
+时间： & \today
+\end{tabular}
+\end{center}
+\end{titlepage}
+}
+
+% ====================================================================================================
+
+\begin{document}
+
+\reportTitle{数据库系统实验报告}{—— 网咖会员与消费追踪系统 ——}{数据库系统原理}
+
+\tableofcontents
+\newpage
+
+% ====================================================================================================
+
+\section{实验场景介绍}
+本实验以网吧作为应用场景，设计并实现了“网咖会员与消费追踪系统”的数据库。
+系统用于管理网吧的会员信息、上机消费记录、充值记录以及座位占用情况，实现日常运营的数据化管理。
+系统主要服务于两类用户：  
+\begin{itemize}
+    \item \textbf{顾客}：通过会员卡或账号登录，能够完成充值、上机及查询个人消费记录等操作。  
+    \item \textbf{管理员}：负责维护会员信息、管理座位状态、统计收入和生成账单。  
+\end{itemize}
+
+系统设计目标是实现对网吧运营的全面管理，包括实时记录顾客的上机起止时间及相应消费金额，确保数据准确可靠；
+自动计算消费费用并生成账单，减少人工操作，提高管理效率；
+对座位状态进行动态管理，包括空闲、使用中及维修等情况，实现资源的合理调度；
+同时支持按用户、日期和座位的多维度统计与查询，为经营决策提供可靠的数据依据。
+
+\section{数据库设计}
+\subsection{数据流图}
+本系统在数据库设计中采用 Level-0 数据流图（图 \ref{fig:dataflow}），用于描述系统与外部实体之间的主要数据交互关系。
+系统以“网咖会员与消费追踪系统”为核心处理过程，外部实体包括顾客和管理员。
+顾客通过系统完成会员办理、账户充值、上机消费及信息查询等操作，管理员主要负责座位管理和信息查询。
+系统在业务处理过程中对用户、座位、充值及消费等数据进行读写，相关数据统一存储于数据库中。
+由于系统规模较小，且后续章节中已对各项业务功能的实现过程进行了详细说明，因此本实验采用 Level-0 数据流图对系统进行整体描述。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../img/DataFlow.png}
+    \caption{系统 Level-0 数据流图}
+    \label{fig:dataflow}
+\end{figure}
+
+\subsection{概念模式 E-R 图设计}
+本系统的概念模式采用实体-关系（E-R）建模方法，设计了四类核心实体：用户（User）、座位（Seat）、充值（Recharge）及上机消费（Consumption），以及它们之间的关联关系。
+系统 E-R 图如图 \ref{fig:ER} 所示。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../img/ER.png}
+    \caption{系统概念模式 E-R 图}
+    \label{fig:ER}
+\end{figure}
+
+系统的核心实体及其主要属性如下：
+\begin{itemize}
+    \item \textbf{User}：存储会员信息，包括用户编号（\texttt{user\_id}）、姓名（\texttt{name}）、会员卡号（\texttt{membership\_card}）、联系方式（\texttt{phone}）及账户余额（\texttt{balance}）。
+    \item \textbf{Seat}：记录座位编号（\texttt{seat\_id}）、位置（\texttt{location}）及状态（\texttt{status}）。
+    \item \textbf{Recharge}：保存用户的充值记录，包括充值编号（\texttt{recharge\_id}）、用户编号（\texttt{user\_id}）、充值金额（\texttt{amount}）及充值时间（\texttt{recharge\_time}）。
+    \item \textbf{Consumption}：记录用户上机消费情况，包括消费编号（\texttt{consumption\_id}）、用户编号（\texttt{user\_id}）、座位编号（\texttt{seat\_id}）、上机开始时间（\texttt{start\_time}）、结束时间（\texttt{end\_time}）及消费金额（\texttt{fee}）。
+\end{itemize}
+
+实体之间的关系设计如下：
+\begin{itemize}
+    \item \textbf{注册}：用户与充值之间存在一对一关系。
+    \item \textbf{充值}：用户与充值之间存在一对多关系，即每个用户可对应多条充值记录。
+    \item \textbf{上机消费}：用户与消费记录之间存在一对多关系，每个用户可对应多条消费记录；每条消费记录关联唯一座位。
+    \item \textbf{座位管理}：座位状态随用户上机或下机而更新，确保座位资源合理调度。
+\end{itemize}
+
+\subsection{数据模式设计}
+根据系统功能需求，系统主要涉及用户、座位、充值和上机消费等数据内容，因此在数据模式设计中分别设置了 User 表、Seat 表、Recharge 表和 Consumption 表。
+各数据表的具体字段设计如下：
+
+\begin{itemize}
+    \item \textbf{User Table}
+    \begin{itemize}
+        \item \texttt{user\_id INT PRIMARY KEY}：用户唯一标识
+        \item \texttt{name VARCHAR(50)}：用户名
+        \item \texttt{membership\_card VARCHAR(20)}：会员卡号
+        \item \texttt{phone VARCHAR(15)}：联系方式
+        \item \texttt{balance DECIMAL(8,2)}：当前余额
+    \end{itemize}
+    \item \textbf{Seat Table}
+    \begin{itemize}
+        \item \texttt{seat\_id INT PRIMARY KEY}：座位编号
+        \item \texttt{location VARCHAR(50)}：座位位置（如 A1、B3）
+        \item \texttt{status VARCHAR(10)}：座位状态（空闲 / 使用中 / 维修）
+    \end{itemize}
+    \item \textbf{Recharge Table}
+    \begin{itemize}
+        \item \texttt{recharge\_id INT PRIMARY KEY}：充值记录编号
+        \item \texttt{user\_id INT}：外键，关联 \texttt{User.user\_id}
+        \item \texttt{amount DECIMAL(8,2)}：充值金额
+        \item \texttt{recharge\_time DATETIME}：充值时间
+    \end{itemize}
+    \item \textbf{Consumption Table}
+    \begin{itemize}
+        \item \texttt{consumption\_id INT PRIMARY KEY}：消费记录编号
+        \item \texttt{user\_id INT}：外键，关联 \texttt{User.user\_id}
+        \item \texttt{seat\_id INT}：外键，关联 \texttt{Seat.seat\_id}
+        \item \texttt{start\_time DATETIME}：上机开始时间
+        \item \texttt{end\_time DATETIME}：上机结束时间
+        \item \texttt{fee DECIMAL(8,2)}：本次消费费用
+    \end{itemize}
+\end{itemize}
+
+其中，User 表用于保存会员的基本信息及账户余额，为后续的充值和上机消费操作提供数据支持；
+Recharge 表记录用户的每一次充值情况，便于按照用户或时间对充值记录进行查询；
+Consumption 表用于保存用户上机过程中的开始时间、结束时间及对应费用，从而实现对上机消费过程的管理；
+Seat 表主要记录网吧座位的编号、位置及当前使用状态，并在用户上机和下机过程中进行相应更新。
+通过上述数据表的配合使用，系统能够完成会员管理、充值管理、上机消费管理以及相关的查询与统计功能。
+
+\section{系统功能介绍}
+本系统围绕网吧日常运营中的核心业务流程进行设计，主要实现会员管理、充值管理、上机消费管理以及座位管理等功能。
+系统以数据库为核心，对用户信息、资金变动和座位使用情况进行统一管理，保证数据的一致性和可追溯性。
+
+\subsection{会员管理功能}
+系统支持顾客办理会员并建立用户档案，统一存储会员的基本信息及账户余额。
+管理员可对会员信息进行维护与查询，系统能够根据用户编号快速定位对应的会员数据，为后续的充值和消费操作提供基础支持。
+
+\subsection{充值管理功能}
+顾客可通过系统进行账户充值。每次充值操作都会生成一条充值记录，同时自动更新用户账户余额。
+充值记录按照时间顺序保存，便于后续按用户或时间范围进行查询和统计，确保充值数据的完整性和可追溯性。
+
+\subsection{上机消费管理功能}
+系统对顾客的上机行为进行完整记录，包括上机开始时间、结束时间以及对应的消费费用。
+消费结束后，系统根据使用时长计算费用，并从用户账户余额中扣除相应金额，同时生成消费记录，从而实现上机消费过程的自动化管理。
+
+\subsection{座位管理功能}
+系统对网吧座位信息进行集中管理，记录每个座位的编号、位置及当前使用状态。
+管理员可根据实际情况调整座位状态，如设置为使用中、空闲或维修状态。在用户上机和下机过程中，系统会同步更新座位状态，避免座位资源冲突。
+
+\subsection{查询与统计功能}
+系统支持对会员信息、充值记录及消费记录的查询操作，可按照用户、时间或座位等条件进行筛选。
+同时，管理员可基于现有数据进行统计分析，为日常管理和运营决策提供数据支持。
+
+\section{核心代码}
+% --------------------------------------------------------------
+
+\begin{lstlisting}[language=SQL, caption=]
+
+\end{lstlisting}
+
+
+
+\section{效果展现}
+
+\section{实验总结}
+
+\end{document}
