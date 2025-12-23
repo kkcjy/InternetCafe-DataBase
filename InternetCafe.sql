@@ -224,25 +224,19 @@ TRUNCATE TABLE User;
 TRUNCATE TABLE Seat;
 SET FOREIGN_KEY_CHECKS = 1;
 
--- 初始化座位 
+-- 初始化座位，将 B2 设置为维修状态
 INSERT INTO Seat(location, status) VALUES
 ('A1', '空闲'),
 ('A2', '空闲'),
 ('B1', '空闲'),
 ('B2', '空闲');
-SELECT '座位初始化完成' AS info;
-
--- 将 B2 设置为维修状态
 CALL UpdateSeatStatus('B2', '维修');
-
-SELECT '管理员已将 B2 设置为维修状态' AS info;
+SELECT '座位初始化完成，A1、A2、B1 为空闲状态，B2 为维修状态' AS info;
 
 -- 会员注册 
 CALL AddUser('张三', 'M001', '13800000001');
 CALL AddUser('李四', 'M002', '13800000002');
 CALL AddUser('王五', 'M003', '13800000003');
-
-SELECT '会员注册完成' AS info;
 
 -- （异常测试：会员卡号重复）
 -- CALL AddUser('赵六', 'M001', '13800000004');
@@ -252,7 +246,7 @@ CALL RechargeAccount('张三', 100.00);
 CALL RechargeAccount('李四', 50.00);
 CALL RechargeAccount('王五', 200.00);
 
--- 上机消费记录
+-- 上机消费
 CALL RecordConsumption('张三', 1, '2025-12-23 10:00:00', '2025-12-23 12:00:00', 20.00);
 CALL RecordConsumption('李四', 2, '2025-12-23 11:00:00', '2025-12-23 13:30:00', 35.00);
 CALL RecordConsumption('王五', 3, '2025-12-23 14:00:00', '2025-12-23 16:00:00', 25.00);
@@ -260,19 +254,12 @@ CALL RecordConsumption('王五', 3, '2025-12-23 14:00:00', '2025-12-23 16:00:00'
 -- （异常测试：维修座位不可用）
 -- CALL RecordConsumption('张三', 4, '2025-12-23 09:00:00', '2025-12-23 10:00:00', 10.00);
 -- （异常测试：使用中座位不可用）
--- CALL RecordConsumption('赵六', 2, '2025-12-23 10:30:00', '2025-12-23 11:30:00', 10.00);
+CALL RecordConsumption('赵六', 2, '2025-12-23 10:30:00', '2025-12-23 11:30:00', 10.00);
 
 -- 消费结算 
 CALL SettleConsumption('张三', 1, 20.00);
 CALL SettleConsumption('李四', 2, 35.00);
 CALL SettleConsumption('王五', 3, 25.00);
-
-SELECT '消费结算完成' AS info;
-
--- 管理员恢复维修座位 
-CALL UpdateSeatStatus('B2', '空闲');
-
-SELECT '管理员已恢复 B2 为可用状态' AS info;
 
 -- 用户信息查询 
 CALL QueryUserInfo('张三');
