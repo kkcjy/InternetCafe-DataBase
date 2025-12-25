@@ -250,8 +250,8 @@ CREATE TABLE IF NOT EXISTS Consumption (
     user_id INT NOT NULL,
     seat_id INT NOT NULL,
     start_time DATETIME NOT NULL,
-    end_time DATETIME NOT NULL,
-    fee DECIMAL(8,2) NOT NULL,
+    end_time DATETIME NULL,
+    fee DECIMAL(8,2) NULL,
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     FOREIGN KEY (seat_id) REFERENCES Seat(seat_id)
 );
@@ -311,9 +311,7 @@ END;
 CREATE PROCEDURE RecordConsumption(
     IN p_name VARCHAR(50),
     IN p_seat_id INT,
-    IN p_start DATETIME,
-    IN p_end DATETIME,
-    IN p_fee DECIMAL(8,2)
+    IN p_start DATETIME
 )
 BEGIN
     DECLARE v_user_id INT;
@@ -326,6 +324,7 @@ BEGIN
     SELECT status INTO v_seat_status
     FROM Seat
     WHERE seat_id = p_seat_id;
+
     -- 判断座位是否空闲
     IF v_seat_status <> '空闲' THEN
         SIGNAL SQLSTATE '45000'
@@ -333,7 +332,7 @@ BEGIN
     ELSE
         -- 插入消费记录
         INSERT INTO Consumption(user_id, seat_id, start_time, end_time, fee)
-        VALUES (v_user_id, p_seat_id, p_start, p_end, p_fee);
+        VALUES (v_user_id, p_seat_id, p_start, NULL, NULL);
         -- 更新座位状态为使用中
         UPDATE Seat
         SET status = '使用中'
@@ -346,6 +345,7 @@ END;
 CREATE PROCEDURE SettleConsumption(
     IN p_name VARCHAR(50),
     IN p_seat_id INT,
+    IN p_end DATETIME,
     IN p_fee DECIMAL(8,2)
 )
 BEGIN
@@ -354,10 +354,13 @@ BEGIN
     SELECT user_id INTO v_user_id
     FROM User
     WHERE name = p_name;
-    -- 扣除用户余额
-    UPDATE User
-    SET balance = balance - p_fee
-    WHERE user_id = v_user_id;
+    -- 更新消费记录：结束时间和费用
+    UPDATE Consumption
+    SET end_time = p_end,
+        fee = p_fee
+    WHERE user_id = v_user_id
+      AND seat_id = p_seat_id
+      AND end_time IS NULL;
     -- 更新座位状态为空闲
     UPDATE Seat
     SET status = '空闲'
@@ -501,6 +504,26 @@ CALL SettleConsumption('王五', 3, 25.00);
     \end{minipage}
     \caption{上机消费与结算管理}
     \label{fig:test2}
+\end{figure}
+
+\section{项目构建}
+基于前述设计思路及 SQL 测试脚本，本项目实现了一个简易的数据库管理系统。
+系统提供用户模式和管理员模式两种操作界面：用户模式支持会员注册、账户充值、上机消费及结算功能；管理员模式支持用户查询、座位状态管理及系统数据汇总查询。
+系统的界面设计如图 \ref{fig:ui} 所示，实现了用户与管理员视角下的数据实时同步。
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{../img/test2.1.png}
+        \caption{上机消费测试结果}
+    \end{minipage}
+    \begin{minipage}{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{../img/test2.2.png}
+        \caption{结算管理测试结果}
+    \end{minipage}
+    \label{fig:ui}
 \end{figure}
 
 \section{实验总结}

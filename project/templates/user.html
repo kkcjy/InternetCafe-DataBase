@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网咖管理系统 - 用户模式</title>
+    <link rel="stylesheet" href="../static/style.css">  <!-- 调整CSS路径 -->
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; margin-bottom: 30px; color: #409eff;">用户功能界面</h1>
+        
+        <!-- 消息提示区 -->
+        <div id="message" class="message" style="display: none;"></div>
+        
+        <!-- 会员办理 -->
+        <div class="card">
+            <h2>1. 会员办理</h2>
+            <form id="addUserForm">
+                <div class="form-group">
+                    <label for="name">姓名</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="membership_card">会员卡号</label>
+                    <input type="text" id="membership_card" name="membership_card" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">手机号</label>
+                    <input type="text" id="phone" name="phone">
+                </div>
+                <button type="submit" class="btn">提交</button>
+            </form>
+        </div>
+        
+        <!-- 账户充值 -->
+        <div class="card">
+            <h2>2. 账户充值</h2>
+            <form id="rechargeForm">
+                <div class="form-group">
+                    <label for="recharge_name">用户姓名</label>
+                    <input type="text" id="recharge_name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="amount">充值金额</label>
+                    <input type="number" id="amount" name="amount" step="0.01" min="0.01" required>
+                </div>
+                <button type="submit" class="btn">充值</button>
+            </form>
+        </div>
+        
+        <!-- 上机开始 -->
+        <div class="card">
+            <h2>3. 开始上机</h2>
+            <form id="startConsumptionForm">
+                <div class="form-group">
+                    <label for="start_name">用户姓名</label>
+                    <input type="text" id="start_name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="start_seat">座位位置</label>
+                    <input type="text" id="start_seat" name="location" required>
+                </div>
+                <div class="form-group">
+                    <label for="start_time">开始时间</label>
+                    <input type="datetime-local" id="start_time" name="start_time" required>
+                </div>
+                <button type="submit" class="btn">开始上机</button>
+            </form>
+        </div>
+
+        <!-- 结束上机 -->
+        <div class="card">
+            <h2>4. 结束上机</h2>
+            <form id="endConsumptionForm">
+                <div class="form-group">
+                    <label for="end_name">用户姓名</label>
+                    <input type="text" id="end_name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_seat">座位位置</label>
+                    <input type="text" id="end_seat" name="location" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_time">结束时间</label>
+                    <input type="datetime-local" id="end_time" name="end_time" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_fee">消费金额</label>
+                    <input type="number" id="end_fee" name="fee" step="0.01" min="0.01" required>
+                </div>
+                <button type="submit" class="btn">结算</button>
+            </form>
+        </div>
+
+        <!-- 返回首页按钮 -->
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="/" class="btn">返回首页</a>
+        </div>
+    </div>
+
+    <script>
+        // 显示消息提示
+        function showMessage(text, type) {
+            const message = document.getElementById('message');
+            message.textContent = text;
+            message.className = `message ${type}`;
+            message.style.display = 'block';
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 3000);
+        }
+
+        // 1. 会员办理
+        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/api/add_user', {method: 'POST', body: formData});
+            const result = await response.json();
+            showMessage(result.message, result.status);
+            if (result.status === 'success') {
+                e.target.reset();
+            }
+        });
+
+        // 2. 账户充值
+        document.getElementById('rechargeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/api/recharge', {method: 'POST', body: formData});
+            const result = await response.json();
+            showMessage(result.message, result.status);
+            if (result.status === 'success') {
+                e.target.reset();
+            }
+        });
+
+        // 3. 上机消费记录
+        document.getElementById('startConsumptionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/api/record_consumption', { method: 'POST', body: formData });
+            const result = await response.json();
+            showMessage(result.message, result.status);
+            if (result.status === 'success') e.target.reset();
+        });
+
+        // 4. 结算消费
+        document.getElementById('endConsumptionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/api/settle_consumption', { method: 'POST', body: formData });
+            const result = await response.json();
+            showMessage(result.message, result.status);
+            if (result.status === 'success') e.target.reset();
+        });
+    </script>
+</body>
+</html>

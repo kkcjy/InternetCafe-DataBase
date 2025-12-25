@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS Consumption (
     user_id INT NOT NULL,
     seat_id INT NOT NULL,
     start_time DATETIME NOT NULL,
-    end_time DATETIME NOT NULL,
-    fee DECIMAL(8,2) NOT NULL,
+    end_time DATETIME NULL,
+    fee DECIMAL(8,2) NULL,
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     FOREIGN KEY (seat_id) REFERENCES Seat(seat_id)
 );
@@ -93,9 +93,7 @@ DELIMITER //
 CREATE PROCEDURE RecordConsumption(
     IN p_name VARCHAR(50),
     IN p_seat_id INT,
-    IN p_start DATETIME,
-    IN p_end DATETIME,
-    IN p_fee DECIMAL(8,2)
+    IN p_start DATETIME
 )
 BEGIN
     DECLARE v_user_id INT;
@@ -108,6 +106,7 @@ BEGIN
     SELECT status INTO v_seat_status
     FROM Seat
     WHERE seat_id = p_seat_id;
+
     -- 判断座位是否空闲
     IF v_seat_status <> '空闲' THEN
         SIGNAL SQLSTATE '45000'
@@ -115,7 +114,7 @@ BEGIN
     ELSE
         -- 插入消费记录
         INSERT INTO Consumption(user_id, seat_id, start_time, end_time, fee)
-        VALUES (v_user_id, p_seat_id, p_start, p_end, p_fee);
+        VALUES (v_user_id, p_seat_id, p_start, NULL, NULL);
         -- 更新座位状态为使用中
         UPDATE Seat
         SET status = '使用中'
@@ -131,6 +130,7 @@ DELIMITER //
 CREATE PROCEDURE SettleConsumption(
     IN p_name VARCHAR(50),
     IN p_seat_id INT,
+    IN p_end DATETIME,
     IN p_fee DECIMAL(8,2)
 )
 BEGIN
@@ -139,10 +139,13 @@ BEGIN
     SELECT user_id INTO v_user_id
     FROM User
     WHERE name = p_name;
-    -- 扣除用户余额
-    UPDATE User
-    SET balance = balance - p_fee
-    WHERE user_id = v_user_id;
+    -- 更新消费记录：结束时间和费用
+    UPDATE Consumption
+    SET end_time = p_end,
+        fee = p_fee
+    WHERE user_id = v_user_id
+      AND seat_id = p_seat_id
+      AND end_time IS NULL;
     -- 更新座位状态为空闲
     UPDATE Seat
     SET status = '空闲'
@@ -150,6 +153,7 @@ BEGIN
 END;
 //
 DELIMITER ;
+
 
 -- func: 查询用户信息 ———— 依据姓名查询用户基本信息、总充值和总消费
 DROP PROCEDURE IF EXISTS QueryUserInfo;

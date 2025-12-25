@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网咖管理系统 - 管理员模式</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; margin-bottom: 30px; color: #409eff;">管理员功能界面</h1>
+        
+        <!-- 消息提示区 -->
+        <div id="message" class="message" style="display: none;"></div>
+        
+        <!-- 查询用户信息 -->
+        <div class="card">
+            <h2>1. 查询用户信息</h2>
+            <form id="queryUserForm">
+                <div class="faorm-group">
+                    <label for="query_name">用户姓名</label>
+                    <input type="text" id="query_name" name="name" required>
+                </div>
+                <button type="submit" class="btn">查询</button>
+            </form>
+            
+            <!-- 查询结果展示 -->
+            <div id="userInfoResult" style="margin-top: 20px; display: none;">
+                <h3>用户基本信息</h3>
+                <table>
+                    <tr>
+                        <th>姓名</th>
+                        <th>会员卡号</th>
+                        <th>手机号</th>
+                        <th>当前余额</th>
+                    </tr>
+                    <tr id="userBasicInfo"></tr>
+                </table>
+                
+                <h3 style="margin-top: 20px;">消费统计</h3>
+                <table>
+                    <tr>
+                        <th>总充值金额</th>
+                        <th>总消费金额</th>
+                    </tr>
+                    <tr id="userConsumeInfo"></tr>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 管理员总览 & 更新座位状态 -->
+        <div class="card">
+            <h2>2. 系统总览 & 座位管理</h2>
+            
+            <!-- 刷新总览按钮 -->
+            <button id="refreshSummary" class="btn" style="margin-bottom: 20px;">刷新总览数据</button>
+            
+            <!-- 用户汇总 -->
+            <h3>用户消费汇总</h3>
+            <div id="userSummaryResult" style="overflow-x: auto;">
+                <table>
+                    <tr>
+                        <th>姓名</th>
+                        <th>总充值</th>
+                        <th>总消费</th>
+                        <th>当前余额</th>
+                    </tr>
+                    <tbody id="userSummaryBody"></tbody>
+                </table>
+            </div>
+            
+            <!-- 座位状态 -->
+            <h3 style="margin-top: 20px;">座位状态</h3>
+            <div id="seatStatusResult" style="overflow-x: auto;">
+                <table>
+                    <tr>
+                        <th>位置</th>
+                        <th>状态</th>
+                    </tr>
+                    <tbody id="seatStatusBody"></tbody>
+                </table>
+            </div>
+            
+            <!-- 更新座位状态 -->
+            <h3 style="margin-top: 20px;">更新座位状态</h3>
+            <form id="updateSeatForm">
+                <div class="form-group">
+                    <label for="location">座位位置</label>
+                    <input type="text" id="location" name="location" required>
+                </div>
+                <div class="form-group">
+                    <label for="status">新状态</label>
+                    <select id="status" name="status" required>
+                        <option value="空闲">空闲</option>
+                        <option value="使用中">使用中</option>
+                        <option value="维护中">维护中</option> <!-- 新增维护中选项 -->
+                    </select>
+                </div>
+                <button type="submit" class="btn">更新</button>
+            </form>
+        </div>
+
+        <!-- 返回首页按钮 -->
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="/" class="btn">返回首页</a>
+        </div>
+    </div>
+
+    <script>
+        // 显示消息提示
+        function showMessage(text, type) {
+            const message = document.getElementById('message');
+            message.textContent = text;
+            message.className = `message ${type}`;
+            message.style.display = 'block';
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 3000);
+        }
+
+        // 1. 查询用户信息
+        document.getElementById('queryUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/api/query_user', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                const data = result.data;
+                // 显示基本信息
+                const basicInfo = document.getElementById('userBasicInfo');
+                basicInfo.innerHTML = `
+                    <td>${data.user_info.name}</td>
+                    <td>${data.user_info.membership_card}</td>
+                    <td>${data.user_info.phone || '未填写'}</td>
+                    <td>¥${data.user_info.balance}</td>
+                `;
+                // 显示消费统计
+                const consumeInfo = document.getElementById('userConsumeInfo');
+                consumeInfo.innerHTML = `
+                    <td>¥${data.total_recharge}</td>
+                    <td>¥${data.total_fee}</td>
+                `;
+                // 显示结果区域
+                document.getElementById('userInfoResult').style.display = 'block';
+                showMessage('查询成功！', 'success');
+            } else {
+                document.getElementById('userInfoResult').style.display = 'none';
+                showMessage(result.message, 'error');
+            }
+        });
+
+        // 2. 加载管理员总览数据
+        async function loadAdminSummary() {
+            try {
+                const response = await fetch('/api/admin_summary');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    const data = result.data;
+                    
+                    // 填充用户汇总
+                    const userSummaryBody = document.getElementById('userSummaryBody');
+                    userSummaryBody.innerHTML = '';
+                    data.user_summary.forEach(user => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${user.name}</td>
+                            <td>¥${user.total_recharge}</td>
+                            <td>¥${user.total_consumption}</td>
+                            <td>¥${user.balance}</td>
+                        `;
+                        userSummaryBody.appendChild(tr);
+                    });
+                    
+                    // 填充座位状态
+                    const seatStatusBody = document.getElementById('seatStatusBody');
+                    seatStatusBody.innerHTML = '';
+                    data.seat_status.forEach(seat => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${seat.location}</td>
+                            <td>${seat.status}</td>
+                        `;
+                        seatStatusBody.appendChild(tr);
+                    });
+                } else {
+                    showMessage(result.message, 'error');
+                }
+            } catch (e) {
+                showMessage('加载数据失败：' + e.message, 'error');
+            }
+        }
+
+        // 页面加载时自动刷新总览数据
+        window.onload = loadAdminSummary;
+        // 手动刷新总览数据
+        document.getElementById('refreshSummary').addEventListener('click', loadAdminSummary);
+
+        // 3. 更新座位状态
+        document.getElementById('updateSeatForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/api/update_seat', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            showMessage(result.message, result.status);
+            if (result.status === 'success') {
+                e.target.reset();
+                loadAdminSummary(); // 刷新座位状态
+            }
+        });
+    </script>
+</body>
+</html>
