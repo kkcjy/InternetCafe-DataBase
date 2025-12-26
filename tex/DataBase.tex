@@ -507,24 +507,26 @@ CALL SettleConsumption('王五', 3, 25.00);
 \end{figure}
 
 \section{项目构建}
-基于前述设计思路及 SQL 测试脚本，本项目实现了一个简易的数据库管理系统。
-系统提供用户模式和管理员模式两种操作界面：用户模式支持会员注册、账户充值、上机消费及结算功能；管理员模式支持用户查询、座位状态管理及系统数据汇总查询。
-系统的界面设计如图 \ref{fig:ui} 所示，实现了用户与管理员视角下的数据实时同步。
 
 \begin{figure}[htbp]
     \centering
-    \begin{minipage}{0.4\textwidth}
+    \begin{minipage}{0.32\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{../img/test2.1.png}
-        \caption{上机消费测试结果}
+        \includegraphics[width=\textwidth]{../img/user.png}
+        \caption{用户界面}
     \end{minipage}
-    \begin{minipage}{0.4\textwidth}
+    \begin{minipage}{0.32\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{../img/test2.2.png}
-        \caption{结算管理测试结果}
+        \includegraphics[width=\textwidth]{../img/admin.png}
+        \caption{管理员界面}
     \end{minipage}
+    \caption{项目页面}
     \label{fig:ui}
 \end{figure}
+
+基于前述设计思路及 SQL 测试脚本，本项目实现了一个简易的数据库管理系统。
+系统提供用户模式和管理员模式两种操作界面：用户模式支持会员注册、账户充值、上机消费及结算功能；管理员模式支持用户查询、座位状态管理及系统数据汇总查询。
+系统的界面设计如图 \ref{fig:ui} 所示，实现了用户与管理员视角下的数据实时同步。
 
 \section{实验总结}
 本实验完成了网咖会员与消费追踪系统的数据库设计与核心功能开发，实现了会员管理、充值、上机消费、消费结算及座位管理等业务逻辑。

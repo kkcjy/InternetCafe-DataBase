@@ -1,166 +1,212 @@
-/* 全局样式 */
+/* ================= 设计变量（暖色低饱和） ================= */
+:root {
+    --bg: #f7f5f2;              /* 暖灰背景 */
+    --card-bg: #ffffff;
+    --border: #e6e1da;
+
+    --text-main: #3a342e;
+    --text-sub: #7a6f65;
+
+    --primary: #d8a47f;         /* 低饱和暖橙 */
+    --primary-hover: #c08a64;
+    --accent-soft: #f1e4d6;
+
+    --radius: 10px;
+}
+
+/* ================= Reset ================= */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Microsoft YaHei', sans-serif;
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
 }
 
 body {
-    background-color: #f5f7fa;
-    color: #333;
+    background-color: var(--bg);
+    color: var(--text-main);
     line-height: 1.6;
 }
 
+/* ================= 容器 ================= */
 .container {
     max-width: 1200px;
-    margin: 50px auto;
-    padding: 0 20px;
+    margin: 48px auto;
+    padding: 0 28px;
 }
 
-/* 入口页样式 */
+/* ================= 页面标题 ================= */
+.page-title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 40px;
+    letter-spacing: 0.5px;
+}
+
+/* ================= 入口页 ================= */
 .entrance-card {
     display: flex;
     justify-content: center;
-    gap: 50px;
-    margin-top: 100px;
+    gap: 40px;
+    margin-top: 120px;
 }
 
 .entrance-btn {
-    width: 200px;
-    height: 100px;
-    background-color: #409eff;
-    color: white;
-    border: none;
-    border-radius: 8px;
+    width: 240px;
+    height: 120px;
+    background-color: var(--card-bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    color: var(--text-main);
     font-size: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    font-weight: 500;
+    text-decoration: none;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    text-decoration: none;
+
+    box-shadow:
+        0 10px 20px rgba(0,0,0,0.06),
+        inset 0 0 0 1px rgba(255,255,255,0.6);
+
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s;
 }
 
 .entrance-btn:hover {
-    background-color: #337ecc;
-    transform: scale(1.05);
+    transform: translateY(-6px);
+    border-color: var(--primary);
+    box-shadow:
+        0 16px 30px rgba(0,0,0,0.08);
 }
 
-/* 功能卡片样式 */
+/* ================= 卡片网格 ================= */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 28px;
+}
+
+/* ================= 功能卡片 ================= */
 .card {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-    padding: 30px;
-    margin-bottom: 30px;
+    background-color: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 26px 28px;
+    border: 1px solid var(--border);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.04);
 }
 
 .card h2 {
-    color: #409eff;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 22px;
+    color: var(--text-main);
+    position: relative;
 }
 
-/* 表单样式 */
+.card h2::after {
+    content: "";
+    display: block;
+    width: 36px;
+    height: 3px;
+    background-color: var(--primary);
+    margin-top: 8px;
+    border-radius: 2px;
+}
+
+/* ================= 表单 ================= */
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 
 label {
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-bottom: 6px;
     display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
 }
 
-input, select {
+input,
+select {
     width: 100%;
-    padding: 10px 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background-color: #fff;
+    color: var(--text-main);
 }
 
+input:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(216,164,127,0.25);
+}
+
+/* ================= 按钮 ================= */
 .btn {
-    background-color: #409eff;
-    color: white;
+    background-color: var(--primary);
+    color: #ffffff;
     border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
-    font-size: 16px;
-    transition: all 0.3s ease;
+    transition: background-color .2s ease, transform .15s ease;
 }
 
 .btn:hover {
-    background-color: #337ecc;
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
 }
 
-/* 弹窗样式 */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-content {
-    background-color: white;
-    padding: 30px;
-    border-radius: 10px;
-    width: 500px;
-    max-width: 90%;
-}
-
-.close {
-    float: right;
-    font-size: 24px;
-    cursor: pointer;
-    color: #999;
-}
-
-.close:hover {
-    color: #333;
-}
-
-/* 表格样式 */
+/* ================= 表格 ================= */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
-}
-
-th, td {
-    padding: 12px 15px;
-    border: 1px solid #ddd;
-    text-align: left;
+    margin-top: 16px;
+    font-size: 14px;
 }
 
 th {
-    background-color: #f8f9fa;
-    font-weight: 600;
+    background-color: var(--accent-soft);
+    color: var(--text-main);
+    font-weight: 500;
 }
 
-/* 消息提示 */
+th,
+td {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+}
+
+tbody tr:hover {
+    background-color: #faf7f3;
+}
+
+/* ================= 消息提示 ================= */
 .message {
-    padding: 15px;
-    border-radius: 5px;
-    margin-bottom: 20px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    font-size: 14px;
 }
 
 .success {
-    background-color: #e6f7e6;
-    color: #52c41a;
+    background-color: #f3ede6;
+    color: #7a4a2e;
 }
 
 .error {
-    background-color: #fff1f0;
-    color: #f5222d;
+    background-color: #faecec;
+    color: #9b2c2c;
+}
+
+/* ================= 底部 ================= */
+.footer-action {
+    text-align: center;
+    margin: 40px 0;
 }
