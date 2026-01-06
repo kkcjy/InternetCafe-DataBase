@@ -72,7 +72,8 @@
 课程名称： & #3 \\
 学号： & 09023402 \\
 姓名： & 金俊贤 \\
-链接： & \href{https://github.com/kkcjy/InternetCafe-DataBase.git}{InternetCafe-DataBase} \\
+链接： & \url{https://github.com/kkcjy/} \\
+       & \url{InternetCafe-DataBase.git} \\
 时间： & \today
 \end{tabular}
 \end{center}
@@ -446,15 +447,13 @@ CALL RechargeAccount('王五', 200.00);
 处理结果如图 \ref{fig:test1} 所示：会员办理与充值功能运行正常，同时系统能够检测重复的会员卡号并提示错误。
 \begin{figure}[htbp]
     \centering
-    \begin{minipage}{0.4\textwidth}
+    \begin{minipage}{0.35\textwidth}
         \centering
         \includegraphics[width=\textwidth]{../img/test1.1.png}
-        \caption{会员办理和充值管理测试结果}
     \end{minipage}
     \begin{minipage}{0.4\textwidth}
         \centering
         \includegraphics[width=\textwidth]{../img/test1.2.png}
-        \caption{会员办理异常测试结果}
     \end{minipage}
     \caption{会员办理与充值管理}
     \label{fig:test1}
@@ -507,15 +506,32 @@ CALL SettleConsumption('王五', 3, 25.00);
 \end{figure}
 
 \section{项目构建}
+本项目后端采用 Flask 框架实现，使用 Python 编写，app.py 作为系统主程序入口。
+程序通过 Flask 路由机制完成页面跳转及业务接口的定义，前端页面存放于 templates 目录，静态资源文件存放于 static 目录，实现了前后端的基本分离。
+系统通过 PyMySQL 与 MySQL 数据库建立连接，在程序启动时自动执行数据库初始化操作，创建所需的数据表及存储过程，保证系统能够直接运行。
+系统基本实现了先前所描述的所有功能，例如图fig:search，实现对用户个人信息的精准查询，但是由于精力有限，类似于流水查询的功能并未进行实现。
+系统基本实现了前述设计中的各项功能，能够支持用户个人信息的准确查询与管理。但受时间和精力限制，诸如消费流水明细查询等扩展功能尚未完成，有待后续进一步完善。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{../img/search.png}
+    \caption{用户信息查询}
+    \label{fig:search}
+\end{figure}
+
+用户与管理员的各项功能均通过调用数据库存储过程完成，减少了应用层对 SQL 语句的直接操作，提高了系统的稳定性与数据一致性。
+系统基本实现了先前所描述的各项功能，如图 \ref{fig:search} 所示，系统能够对用户个人信息进行准确查询。
+其余功能已在项目中完整实现，可通过 \url{{https://github.com/kkcjy/InternetCafe-DataBase.git}} 拉取源码进行查看，报告中不再逐一列出。
+但受时间和精力限制，诸如消费流水明细查询等扩展功能尚未实现，有待后续进一步完善。
 
 \begin{figure}[htbp]
     \centering
-    \begin{minipage}{0.32\textwidth}
+    \begin{minipage}{0.42\textwidth}
         \centering
         \includegraphics[width=\textwidth]{../img/user.png}
         \caption{用户界面}
     \end{minipage}
-    \begin{minipage}{0.32\textwidth}
+    \begin{minipage}{0.42\textwidth}
         \centering
         \includegraphics[width=\textwidth]{../img/admin.png}
         \caption{管理员界面}
@@ -524,16 +540,14 @@ CALL SettleConsumption('王五', 3, 25.00);
     \label{fig:ui}
 \end{figure}
 
-基于前述设计思路及 SQL 测试脚本，本项目实现了一个简易的数据库管理系统。
-系统提供用户模式和管理员模式两种操作界面：用户模式支持会员注册、账户充值、上机消费及结算功能；管理员模式支持用户查询、座位状态管理及系统数据汇总查询。
-系统的界面设计如图 \ref{fig:ui} 所示，实现了用户与管理员视角下的数据实时同步。
-
 \section{实验总结}
 本实验完成了网咖会员与消费追踪系统的数据库设计与核心功能开发，实现了会员管理、充值、上机消费、消费结算及座位管理等业务逻辑。
 通过存储过程封装操作，保证了数据一致性和原子性。
 测试结果显示，系统功能运行正常，能够正确处理重复会员注册、座位占用及维修状态等异常情况。
 
-同时，也存在一些不足：对座位状态持续时间的管理不够完善，但这类业务逻辑通常不在数据库层处理，数据库只需支持基础 CRUD 操作即可；
-系统尚未对存取效率和大规模数据处理能力进行优化，但考虑到网吧业务量通常不集中，也不是很重要；
-较为重要的是，数据库备份和恢复机制的设计需进一步完善，以保障数据安全。
+同时，系统仍存在一定不足。
+其中，对座位状态持续时间的管理较为简单，该类业务逻辑通常由应用层而非数据库层负责实现，因此对系统整体影响有限；
+此外，系统尚未针对存取效率及大规模数据处理能力进行专项优化，但在当前应用规模下尚不构成主要问题。
+相比之下，更为重要的是数据库备份与恢复机制仍需进一步完善，以切实保障系统数据的安全性与可靠性。
+
 \end{document}
